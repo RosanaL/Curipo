@@ -238,5 +238,22 @@
     "models_supported": ["claude-3-5-sonnet", "gpt-4o-mini"],
     "built_with": ["Calendly API", "Google Calendar", "Outlook", "Twilio"],
     "example_prompt": "Find a time for a 45-minute interview with 3 interviewers and the candidate next week"
+  },
+  {
+    "id": "soar-flight-search",
+    "name": "Soar",
+    "tagline": "Find the cheapest flights anywhere in the world",
+    "description": "Soar searches the web to find you the best flight deals. Enter your departure city and destination, pick dates, and it surfaces the cheapest options across airlines. Also supports open-ended search like 'cheapest countries to fly to from LA' if you don't have a destination in mind.",
+    "use_cases": [
+      "Find the cheapest flight between two cities on specific dates",
+      "Discover the cheapest countries to fly to from your location",
+      "Search one-way or return flights across multiple airlines"
+    ],
+    "tags": ["travel", "flights", "search", "deals", "booking"],
+    "complexity": "low",
+    "models_supported": [],
+    "built_with": ["custom flight search engine"],
+    "example_prompt": "Find me the cheapest flight from Los Angeles to Tokyo in August",
+    "url": "https://flysoar.ai"
   }
 ]
