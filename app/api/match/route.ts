@@ -47,9 +47,12 @@ Return ONLY the JSON array. No markdown, no explanation, no code blocks.`;
   const data = await res.json();
   const raw = data.choices?.[0]?.message?.content || "";
 
+  // Strip markdown code blocks if model wraps response
+  const cleaned = raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
+
   let matches;
   try {
-    matches = JSON.parse(raw);
+    matches = JSON.parse(cleaned);
   } catch {
     return NextResponse.json({ error: "Failed to parse response", raw }, { status: 500 });
   }
