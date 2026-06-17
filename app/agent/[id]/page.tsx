@@ -1,25 +1,17 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import agentsData from "@/data/agents.json";
+import { getAgentById } from "@/lib/supabase";
 
-interface Agent {
-  id: string;
-  name: string;
-  tagline: string;
-  description: string;
-  use_cases: string[];
-  tags: string[];
-  complexity: string;
-  models_supported: string[];
-  built_with: string[];
-  example_prompt: string;
+function Stars({ rating }: { rating: number }) {
+  const full = Math.round(rating);
+  return (
+    <span className="text-amber-400">
+      {"★".repeat(full)}
+      <span className="text-slate-200">{"★".repeat(5 - full)}</span>
+      <span className="text-slate-400 ml-2 text-sm">{rating?.toFixed(1)}</span>
+    </span>
+  );
 }
-
-const complexityColor: Record<string, string> = {
-  low: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  medium: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  high: "text-rose-400 bg-rose-400/10 border-rose-400/20",
-};
 
 export default async function AgentPage({
   params,
@@ -27,92 +19,91 @@ export default async function AgentPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const agent = (agentsData as Agent[]).find((a) => a.id === id);
+  const agent = await getAgentById(id);
 
   if (!agent) notFound();
 
   return (
     <main className="min-h-screen px-4 py-12 max-w-2xl mx-auto">
-      <Link href="/" className="text-slate-500 hover:text-slate-300 text-sm transition-colors">
+      <Link href="/" className="text-slate-400 hover:text-slate-700 text-sm transition-colors">
         ← Home
       </Link>
 
-      <div className="mt-10">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">{agent.name}</h1>
-            <p className="text-slate-400 text-base">{agent.tagline}</p>
+      {/* Vertical card */}
+      <div className="mt-8 bg-white border border-slate-200 rounded-3xl shadow-sm p-8">
+        {/* Header — avatar centered on top */}
+        <div className="flex flex-col items-center text-center mb-6">
+          {agent.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={agent.avatar_url}
+              alt={agent.name}
+              className="w-28 h-28 rounded-full object-cover border border-slate-200 mb-4"
+            />
+          ) : (
+            <div className="w-28 h-28 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-4xl text-indigo-300 mb-4">
+              ⬡
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-slate-900">{agent.name}</h1>
+            {agent.price && (
+              <span className="text-xs px-2.5 py-1 rounded-full border text-emerald-600 bg-emerald-50 border-emerald-200">
+                {agent.price}
+              </span>
+            )}
           </div>
-          <span className={`shrink-0 text-xs px-2.5 py-1 rounded-full border ${complexityColor[agent.complexity]}`}>
-            {agent.complexity} complexity
-          </span>
+          {agent.tagline && (
+            <p className="text-slate-500 text-base mt-2">{agent.tagline}</p>
+          )}
+          {agent.rating != null && (
+            <div className="mt-3">
+              <Stars rating={agent.rating} />
+            </div>
+          )}
         </div>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1.5 mb-8">
-          {agent.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs text-slate-500 bg-[#1e1e2e] border border-[#2a2a3d] px-2.5 py-1 rounded-full"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        {/* Description */}
-        <section className="mb-8">
-          <h2 className="text-slate-400 text-xs uppercase tracking-widest mb-3">About</h2>
-          <p className="text-slate-300 leading-relaxed">{agent.description}</p>
+        {/* Description / what it does */}
+        <section className="mb-6">
+          <h2 className="text-slate-400 text-xs uppercase tracking-widest mb-2">What It Does</h2>
+          <p className="text-slate-700 leading-relaxed">{agent.description}</p>
         </section>
 
-        {/* Use cases */}
-        <section className="mb-8">
-          <h2 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Use cases</h2>
-          <ul className="flex flex-col gap-2">
-            {agent.use_cases.map((uc) => (
-              <li key={uc} className="flex items-start gap-2.5 text-slate-300 text-sm">
-                <span className="text-indigo-400 mt-0.5">▸</span>
-                {uc}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Example prompt */}
-        <section className="mb-8">
-          <h2 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Example prompt</h2>
-          <div className="bg-[#13131f] border border-[#2a2a3d] rounded-xl px-4 py-3">
-            <p className="text-slate-300 text-sm italic">"{agent.example_prompt}"</p>
-          </div>
-        </section>
-
-        {/* Models & stack */}
-        <div className="grid grid-cols-2 gap-4 mb-10">
-          <section className="bg-[#13131f] border border-[#2a2a3d] rounded-xl p-4">
-            <h2 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Supported models</h2>
-            <ul className="flex flex-col gap-1.5">
-              {agent.models_supported.map((m) => (
-                <li key={m} className="text-slate-300 text-xs font-mono">{m}</li>
+        {/* Models */}
+        {agent.models?.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-slate-400 text-xs uppercase tracking-widest mb-2">Supported Models</h2>
+            <div className="flex flex-wrap gap-2">
+              {agent.models.map((m) => (
+                <span
+                  key={m}
+                  className="text-xs text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full font-mono"
+                >
+                  {m}
+                </span>
               ))}
-            </ul>
+            </div>
           </section>
-          <section className="bg-[#13131f] border border-[#2a2a3d] rounded-xl p-4">
-            <h2 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Built with</h2>
-            <ul className="flex flex-col gap-1.5">
-              {agent.built_with.map((b) => (
-                <li key={b} className="text-slate-300 text-xs font-mono">{b}</li>
-              ))}
-            </ul>
-          </section>
-        </div>
+        )}
 
         {/* CTA */}
-        <button className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors">
-          Request Access
-        </button>
-        <p className="text-center text-slate-600 text-xs mt-2">Access requests are reviewed manually</p>
+        {agent.url ? (
+          <a
+            href={agent.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors text-center"
+          >
+            Visit Agent ↗
+          </a>
+        ) : (
+          <button className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors">
+            Request Access
+          </button>
+        )}
+        <p className="text-center text-slate-400 text-xs mt-2">
+          {agent.url ? "Opens the agent's website in a new tab" : "Access requests are reviewed manually"}
+        </p>
       </div>
     </main>
   );
