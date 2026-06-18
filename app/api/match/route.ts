@@ -1,9 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllAgents } from "@/lib/supabase";
+import { getAllAgents, Agent } from "@/lib/supabase";
 
-const MODEL = process.env.LLM_MODEL || "anthropic/claude-opus-4-5";
-const BASE_URL = process.env.LLM_BASE_URL || "https://openrouter.ai/api/v1";
-const API_KEY = process.env.LLM_API_KEY || "";
+// Simple stopwords so generic words don't dominate scoring.
+const STOPWORDS = new Set([
+  "a", "an", "the", "to", "for", "of", "and", "or", "my", "me", "i", "with",
+  "help", "want", "need", "can", "you", "please", "how", "do", "that", "this",
+  "is", "are", "it", "on", "in", "at", "be", "have", "get",
+]);
+
+function tokenize(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length > 1 && !STOPWORDS.has(t));
+}
+
+// Weighted keyword score: matches in name/tagline count more than description.
+function scoreAgent(agent: Agent, terms: string[]): { score: number; hits: string[] } {
+  const name = (agent.name || "").toLowerCase();
+  const tagline = (agent.tagline || "").toLowerCase();
+  const description = (agent.description || "").toLowerCase();
+  const models = (agent.models || []).join(" ").toLowerCase();
+
+  let score = 0;
+  const hits: string[] = [];
+
+  for (const term of terms) {
+    let matched = false;
+    if (name.includes(term)) { score += 5; matched = true; }
+    if (tagline.includes(term)) { score += 3; matched = true; }
+    if (models.includes(term)) { score += 3; matched = true; }
+    if (description.includes(term)) { score += 1; matched = true; }
+    if (matched) hits.push(term);
+  }
+  return { score, hits };
+}
 
 export async function POST(req: NextRequest) {
   const { query } = await req.json();
@@ -12,8 +44,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing query" }, { status: 400 });
   }
 
-  // Fetch agents from Supabase (server-side)
-  let agents;
+  let agents: Agent[];
   try {
     agents = await getAllAgents();
   } catch (e) {
@@ -23,61 +54,24 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (agents.length === 0) {
-    return NextResponse.json({ matches: [] });
-  }
+  const terms = tokenize(query);
 
-  const prompt = `You are an AI agent matchmaker. A user wants to automate something and you must find the best matching agents from the list below.
-
-User query: "${query}"
-
-Available agents (JSON):
-${JSON.stringify(agents, null, 2)}
-
-Return ONLY a valid JSON array of up to 3 objects, each with:
-- "id": the agent's id string
-- "reason": a 1-2 sentence explanation of why this agent fits the user's need
-
-Example format:
-[
-  { "id": "some-agent-id", "reason": "This agent is a great fit because..." }
-]
-
-Return ONLY the JSON array. No markdown, no explanation, no code blocks.`;
-
-  const res = await fetch(`${BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 512,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-
-  const data = await res.json();
-  const raw = data.choices?.[0]?.message?.content || "";
-
-  // Strip markdown code blocks if model wraps response
-  const cleaned = raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
-
-  let matches: { id: string; reason: string }[];
-  try {
-    matches = JSON.parse(cleaned);
-  } catch {
-    return NextResponse.json({ error: "Failed to parse response", raw }, { status: 500 });
-  }
-
-  // Enrich matches with full agent data
-  const enriched = matches
-    .map((m) => {
-      const agent = agents.find((a) => a.id === m.id);
-      return agent ? { ...agent, reason: m.reason } : null;
+  const ranked = agents
+    .map((agent) => {
+      const { score, hits } = scoreAgent(agent, terms);
+      return { agent, score, hits };
     })
-    .filter(Boolean);
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score || (b.agent.rating || 0) - (a.agent.rating || 0))
+    .slice(0, 5);
 
-  return NextResponse.json({ matches: enriched });
+  const matches = ranked.map(({ agent, hits }) => ({
+    ...agent,
+    reason:
+      hits.length > 0
+        ? `Matched your search for ${hits.map((h) => `"${h}"`).join(", ")}.`
+        : "A relevant match for your query.",
+  }));
+
+  return NextResponse.json({ matches });
 }
