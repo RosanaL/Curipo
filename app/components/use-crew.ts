@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   addAgentToCrew,
+  assignAgentToCategory,
   createCrew,
+  createCrewCategory,
   CREW_STORAGE_KEY,
   CREW_UPDATED_EVENT,
   Crew,
   CrewAgent,
   readCrew,
+  reorderCategoryAgents,
   removeAgentFromCrew,
   writeCrew,
 } from "@/lib/crew";
@@ -59,6 +62,28 @@ export function useCrew() {
     setCrew(nextCrew);
   }
 
+  function reorderAgents(agents: CrewAgent[]) {
+    if (!crew) return;
+    const nextCrew = { ...crew, agents };
+    writeCrew(nextCrew);
+    setCrew(nextCrew);
+  }
+
+  function addCategory(name: string) {
+    const nextCrew = createCrewCategory(name);
+    setCrew(nextCrew);
+  }
+
+  function moveAgentToCategory(agentId: string, categoryId: string) {
+    const nextCrew = assignAgentToCategory(agentId, categoryId);
+    setCrew(nextCrew);
+  }
+
+  function reorderCategory(categoryId: string, agentIds: string[]) {
+    const nextCrew = reorderCategoryAgents(categoryId, agentIds);
+    setCrew(nextCrew);
+  }
+
   return {
     crew,
     loaded,
@@ -66,6 +91,10 @@ export function useCrew() {
     renameCrew,
     addAgent,
     removeAgent,
+    reorderAgents,
+    addCategory,
+    moveAgentToCategory,
+    reorderCategory,
     hasAgent: (agentId: string) => crew?.agents.some((agent) => agent.id === agentId) || false,
   };
 }

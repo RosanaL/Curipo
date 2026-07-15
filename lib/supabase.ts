@@ -12,6 +12,8 @@ export interface Agent {
   id: string;
   name: string;        // name
   avatar_url?: string; // avatar image
+  animation_url?: string; // animated avatar
+  poster_url?: string; // still image fallback for animated avatar
   tagline?: string;    // short bio / one-liner
   models: string[];    // models
   price: string;       // price

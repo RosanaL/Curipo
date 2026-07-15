@@ -61,16 +61,12 @@ export async function POST(req: NextRequest) {
       const { score, hits } = scoreAgent(agent, terms);
       return { agent, score, hits };
     })
-    .filter((r) => r.score > 0)
-    .sort((a, b) => b.score - a.score || (b.agent.rating || 0) - (a.agent.rating || 0))
-    .slice(0, 5);
+    .filter((result) => result.score > 0)
+    .sort((a, b) => b.score - a.score || (b.agent.rating || 0) - (a.agent.rating || 0));
 
   const matches = ranked.map(({ agent, hits }) => ({
     ...agent,
-    reason:
-      hits.length > 0
-        ? `Matched your search for ${hits.map((h) => `"${h}"`).join(", ")}.`
-        : "A relevant match for your query.",
+    reason: `Matched your search for ${hits.map((h) => `"${h}"`).join(", ")}.`,
   }));
 
   return NextResponse.json({ matches });

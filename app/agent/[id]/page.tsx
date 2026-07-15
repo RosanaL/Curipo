@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAgentById } from "@/lib/supabase";
+import { resolveAgentMedia } from "@/lib/agent-media";
 import { CrewLink, CrewToggleButton } from "@/app/components/crew-controls";
 
 const rarityStyles = [
@@ -56,9 +57,10 @@ export default async function AgentPage({
 
   const rarity = getRarity(agent.rating);
   const stats = getStats(agent);
+  const media = resolveAgentMedia(agent);
 
   return (
-    <main className="relative min-h-screen overflow-hidden px-5 py-6 sm:px-8">
+    <main className="crt-shell relative min-h-screen overflow-hidden px-5 py-6 sm:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.045)_1px,transparent_1px),linear-gradient(rgba(15,23,42,0.045)_1px,transparent_1px)] bg-[size:34px_34px]" />
 
       <div className="relative mx-auto max-w-6xl">
@@ -98,10 +100,23 @@ export default async function AgentPage({
 
               <div className="relative overflow-hidden border-2 border-slate-950 bg-gradient-to-br from-amber-100 via-white to-cyan-100">
                 <div className="aspect-[4/3]">
-                  {agent.avatar_url ? (
+                  {media.animationUrl ? (
+                    <video
+                      aria-label={`${agent.name} animated avatar`}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      poster={media.posterUrl}
+                      className="h-full w-full object-cover"
+                    >
+                      <source src={media.animationUrl} type={media.animationUrl.endsWith(".mp4") ? "video/mp4" : "video/webm"} />
+                    </video>
+                  ) : media.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={agent.avatar_url}
+                      src={media.avatarUrl}
                       alt={agent.name}
                       className="h-full w-full object-cover"
                     />

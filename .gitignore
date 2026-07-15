@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated discovery data
+/data/agent-scrape/out/
+
+# local design references & assets (not part of the app)
+/agent卡片们/
+/curipo灵感/
+.DS_Store

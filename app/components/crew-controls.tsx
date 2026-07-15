@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { motion } from "motion/react";
 import { CrewAgent } from "@/lib/crew";
 import { useCrew } from "./use-crew";
 
@@ -11,7 +12,17 @@ export function CrewLink({ className = "" }: { className?: string }) {
 
   return (
     <Link href="/crew" className={className}>
-      My Crew{count > 0 ? ` (${count})` : ""}
+      My Crew
+      {count > 0 && (
+        <motion.span
+          key={count}
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="inline-block"
+        >
+          {` (${count})`}
+        </motion.span>
+      )}
     </Link>
   );
 }
@@ -27,9 +38,10 @@ export function CrewToggleButton({
   const joined = hasAgent(agent.id);
 
   return (
-    <button
+    <motion.button
       type="button"
       disabled={!loaded}
+      onPointerDownCapture={(event) => event.stopPropagation()}
       onClick={(event) => {
         event.stopPropagation();
         if (joined) removeAgent(agent.id);
@@ -37,9 +49,13 @@ export function CrewToggleButton({
       }}
       className={className}
       aria-pressed={joined}
+      animate={joined ? { scale: [1, 1.12, 1], rotate: [0, -2, 0] } : { scale: 1, rotate: 0 }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.94 }}
+      transition={{ duration: 0.34, ease: "easeOut" }}
     >
       {joined ? "In my crew" : "+ Add to my crew"}
-    </button>
+    </motion.button>
   );
 }
 
@@ -67,12 +83,14 @@ export function ShareAgentButton({ agent }: { agent: CrewAgent }) {
   }
 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={share}
       className="border border-slate-950 bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-950 transition hover:bg-amber-100"
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.95 }}
     >
       {copied ? "Link copied" : "Share link"}
-    </button>
+    </motion.button>
   );
 }
