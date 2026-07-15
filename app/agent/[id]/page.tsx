@@ -1,8 +1,41 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAgentById } from "@/lib/supabase";
 import { resolveAgentMedia } from "@/lib/agent-media";
-import { CrewLink, CrewToggleButton } from "@/app/components/crew-controls";
+import { CrewLink, CrewToggleButton, ShareAgentButton } from "@/app/components/crew-controls";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const agent = await getAgentById(id);
+
+  if (!agent) {
+    return { title: "Agent not found — Curipo" };
+  }
+
+  const title = `${agent.name} — Curipo`;
+  const description = agent.tagline || agent.description || `Meet ${agent.name}, an AI agent on Curipo.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      url: `/agent/${agent.id}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 const rarityStyles = [
   { name: "Legendary", border: "border-amber-500", text: "text-amber-800", accent: "#f59e0b" },
@@ -73,9 +106,7 @@ export default async function AgentPage({
           </Link>
           <div className="flex items-center gap-4">
             <CrewLink className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 transition hover:text-slate-950" />
-            <p className="border-l border-slate-300 pl-4 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
-              agent dossier
-            </p>
+            <ShareAgentButton agent={agent} />
           </div>
         </header>
 
