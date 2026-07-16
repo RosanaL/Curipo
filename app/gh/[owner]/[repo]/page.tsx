@@ -86,13 +86,22 @@ export default async function GithubCardPage({
 
           {/* header: avatar + name */}
           <div className="flex items-center gap-5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={card.avatarUrl}
-              alt={`${card.owner} avatar`}
-              className="size-20 rounded-full object-cover"
-              style={{ border: "3px solid #4a3421", transform: "rotate(-2deg)" }}
-            />
+            {card.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={card.avatarUrl}
+                alt={`${card.name} logo`}
+                className="size-20 shrink-0 rounded-full bg-white object-contain p-1"
+                style={{ border: "3px solid #4a3421", transform: "rotate(-2deg)" }}
+              />
+            ) : (
+              <div
+                className="grid size-20 shrink-0 place-items-center rounded-full text-4xl"
+                style={{ border: "3px solid #4a3421", background: "#f6e2c4", transform: "rotate(-2deg)" }}
+              >
+                {card.name.slice(0, 1).toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0">
               <h1 className="truncate text-4xl leading-tight">{card.name}</h1>
               <p className="text-lg opacity-70">by {card.owner}</p>

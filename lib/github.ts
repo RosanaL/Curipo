@@ -6,7 +6,7 @@ export interface RepoCard {
   repo: string;
   name: string;
   description: string;
-  avatarUrl: string;
+  avatarUrl?: string; // logo/mascot from the README; undefined → placeholder
   homepage?: string;
   githubUrl: string;
   language?: string;
@@ -57,6 +57,36 @@ async function contributorCount(owner: string, repo: string): Promise<number> {
   return Array.isArray(body) ? Math.max(body.length, 1) : 1;
 }
 
+// Badge / shield image hosts we never want as an avatar.
+const BADGE_PATTERN =
+  /shields\.io|badgen|trendshift|codecov|circleci|travis-ci|snyk\.io|fossa|visitor|forthebadge|deepsource|codacy|coveralls|herokucdn|vercel\.com\/button|\/badge|badge\.svg|buymeacoffee|ko-fi|patreon/i;
+
+function resolveReadmeImage(src: string, owner: string, repo: string): string {
+  if (/^https?:\/\//i.test(src)) return src;
+  const clean = src.replace(/^\.?\//, "");
+  return `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/${clean}`;
+}
+
+// Pull the first non-badge image out of the repo README (its logo/mascot).
+async function fetchReadmeImage(owner: string, repo: string): Promise<string | null> {
+  const readme = await gh<{ download_url: string | null }>(`/repos/${owner}/${repo}/readme`);
+  if (!readme?.download_url) return null;
+
+  const res = await fetch(readme.download_url, { next: { revalidate: 3600 } });
+  if (!res.ok) return null;
+  const md = await res.text();
+
+  // Scan HTML <img src> and markdown ![](url) in document order.
+  const regex = /<img[^>]+src=["']([^"']+)["']|!\[[^\]]*\]\(\s*<?([^)\s>]+)/gi;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(md)) !== null) {
+    const src = match[1] || match[2];
+    if (!src || BADGE_PATTERN.test(src)) continue;
+    return resolveReadmeImage(src, owner, repo);
+  }
+  return null;
+}
+
 function clamp(value: number, min = 30, max = 99) {
   return Math.max(min, Math.min(max, Math.round(value)));
 }
@@ -97,9 +127,10 @@ export async function fetchRepoCard(owner: string, repo: string): Promise<RepoCa
   const data = await gh<RepoResponse>(`/repos/${owner}/${repo}`);
   if (!data) return null;
 
-  const [langs, contributors] = await Promise.all([
+  const [langs, contributors, readmeImage] = await Promise.all([
     gh<Record<string, number>>(`/repos/${owner}/${repo}/languages`),
     contributorCount(owner, repo),
+    fetchReadmeImage(owner, repo),
   ]);
 
   const languages = Object.keys(langs || {});
@@ -140,7 +171,7 @@ export async function fetchRepoCard(owner: string, repo: string): Promise<RepoCa
     repo: data.name,
     name: data.name,
     description: data.description || "A quiet little project with no description yet.",
-    avatarUrl: data.owner.avatar_url,
+    avatarUrl: readmeImage || undefined,
     homepage: data.homepage || undefined,
     githubUrl: data.html_url,
     language: data.language || undefined,

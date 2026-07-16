@@ -62,10 +62,30 @@ export default async function Image({
                   style={{
                     borderRadius: 999,
                     border: "5px solid #4a3421",
+                    background: "#ffffff",
+                    objectFit: "contain",
                     transform: "rotate(-3deg)",
                   }}
                 />
-              ) : null}
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    width: 110,
+                    height: 110,
+                    borderRadius: 999,
+                    border: "5px solid #4a3421",
+                    background: "#f6e2c4",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 56,
+                    fontWeight: 700,
+                    transform: "rotate(-3deg)",
+                  }}
+                >
+                  {name.slice(0, 1).toUpperCase()}
+                </div>
+              )}
               <div style={{ display: "flex", flexDirection: "column", marginLeft: 28 }}>
                 <div style={{ display: "flex", fontSize: 64, fontWeight: 700, lineHeight: 1 }}>{name}</div>
                 <div style={{ display: "flex", fontSize: 30, opacity: 0.65, marginTop: 8 }}>by {by}</div>
