@@ -4,13 +4,14 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Patrick_Hand } from "next/font/google";
 import { parseRepoInput } from "@/lib/github";
+import { parseSiteInput } from "@/lib/site-card";
 
 const hand = Patrick_Hand({ weight: "400", subsets: ["latin"] });
 
 const examples = [
   "DietrichGebert/ponytail",
   "anthropics/claude-code",
-  "vercel/next.js",
+  "okara.ai",
 ];
 
 export default function MakeCardPage() {
@@ -21,14 +22,25 @@ export default function MakeCardPage() {
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    const parsed = parseRepoInput(input);
-    if (!parsed) {
-      setError("Hmm, that doesn't look like a GitHub repo. Try owner/repo or a full link.");
+
+    // GitHub repo → stat card; any other URL → website identity card.
+    const repo = parseRepoInput(input);
+    if (repo) {
+      setError("");
+      setLoading(true);
+      router.push(`/gh/${repo.owner}/${repo.repo}`);
       return;
     }
-    setError("");
-    setLoading(true);
-    router.push(`/gh/${parsed.owner}/${parsed.repo}`);
+
+    const host = parseSiteInput(input);
+    if (host) {
+      setError("");
+      setLoading(true);
+      router.push(`/site/${host}`);
+      return;
+    }
+
+    setError("Hmm, that doesn't look like a repo or a website. Try owner/repo or a link.");
   }
 
   return (
@@ -44,11 +56,11 @@ export default function MakeCardPage() {
       <div className="w-full max-w-lg text-center">
         <p className="text-xl opacity-70">curipo</p>
         <h1 className="mt-2 text-5xl leading-tight">
-          Turn a GitHub repo into a little card
+          Turn a repo or a website into a little card
         </h1>
         <p className="mt-3 text-xl opacity-75">
-          Paste a repo link. We&apos;ll make it a card you can share, like a
-          business card for your favorite agent.
+          Paste a GitHub repo or any product link. We&apos;ll make it a card you
+          can share, like a business card for your favorite agent.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8">
@@ -58,7 +70,7 @@ export default function MakeCardPage() {
               setInput(event.target.value);
               setError("");
             }}
-            placeholder="github.com/owner/repo"
+            placeholder="github.com/owner/repo  ·  or  okara.ai"
             spellCheck={false}
             className="w-full bg-white px-5 py-4 text-center text-2xl outline-none placeholder:opacity-40"
             style={{

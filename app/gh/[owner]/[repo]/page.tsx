@@ -7,7 +7,19 @@ import { ShareCardButton } from "@/app/components/share-card-button";
 
 const hand = Patrick_Hand({ weight: "400", subsets: ["latin"] });
 
-// Crayon palette for stat bars — warm, no neon.
+// Warm, cozy rarity tiers by overall score — not neon.
+function getTier(overall: number) {
+  if (overall >= 90)
+    return { name: "Legendary", frame: "#d99a1c", tint: "#fdf1d6", ink: "#8a5e0c", badge: "#f0c14b" };
+  if (overall >= 80)
+    return { name: "Epic", frame: "#cf6a52", tint: "#fbe6df", ink: "#8f4131", badge: "#e79079" };
+  if (overall >= 70)
+    return { name: "Rare", frame: "#3f9591", tint: "#d9efed", ink: "#2c6a67", badge: "#68b8b3" };
+  if (overall >= 60)
+    return { name: "Solid", frame: "#7a9f52", tint: "#e7f0d9", ink: "#556f38", badge: "#a3c274" };
+  return { name: "Rookie", frame: "#6f8fb0", tint: "#e3ecf4", ink: "#456180", badge: "#9bb6d2" };
+}
+
 const crayons = ["#f4a261", "#8ab17d", "#7fb3d5", "#e8909c", "#eec170"];
 
 export async function generateMetadata({
@@ -50,6 +62,8 @@ export default async function GithubCardPage({
 
   if (!card) notFound();
 
+  const tier = getTier(card.overall);
+
   return (
     <main
       className={`${hand.className} min-h-screen px-4 py-10`}
@@ -60,81 +74,97 @@ export default async function GithubCardPage({
         color: "#4a3421",
       }}
     >
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-[380px]">
         {/* top nav */}
-        <div className="mb-6 flex items-center justify-between text-lg">
+        <div className="mb-5 flex items-center justify-between text-lg">
           <Link href="/make" className="underline decoration-wavy underline-offset-4 hover:opacity-70">
             ← make another
           </Link>
           <span className="opacity-60">curipo card</span>
         </div>
 
-        {/* the card */}
+        {/* ===== the trading card (portrait) ===== */}
         <div
-          className="relative bg-white p-7"
+          className="relative mx-auto bg-white"
           style={{
-            border: "3px solid #4a3421",
-            borderRadius: "255px 18px 225px 18px / 18px 225px 18px 255px",
-            boxShadow: "6px 8px 0 rgba(74, 52, 33, 0.16)",
+            border: `5px solid ${tier.frame}`,
+            borderRadius: "24px",
+            boxShadow: `0 0 0 3px #fff, 6px 9px 0 rgba(74,52,33,0.18)`,
+            padding: 14,
           }}
         >
-          {/* tape */}
-          <div
-            className="absolute -top-3 left-1/2 h-7 w-24 -translate-x-1/2 -rotate-2"
-            style={{ background: "rgba(238, 193, 112, 0.55)" }}
-          />
+          {/* rarity ribbon */}
+          <div className="flex items-center justify-between px-1 pb-2">
+            <span
+              className="rounded-full px-3 py-0.5 text-base uppercase tracking-wide"
+              style={{ background: tier.tint, color: tier.ink, border: `2px solid ${tier.frame}` }}
+            >
+              {tier.name}
+            </span>
+            <div className="flex items-center gap-2">
+              <div
+                className="grid size-12 place-items-center rounded-full text-2xl"
+                style={{ background: tier.badge, border: "3px solid #4a3421", transform: "rotate(3deg)" }}
+              >
+                {card.overall}
+              </div>
+            </div>
+          </div>
 
-          {/* header: avatar + name */}
-          <div className="flex items-center gap-5">
+          {/* portrait */}
+          <div
+            className="relative flex items-center justify-center overflow-hidden"
+            style={{
+              height: 220,
+              borderRadius: "16px",
+              background: `radial-gradient(circle at 50% 35%, #ffffff, ${tier.tint})`,
+              border: `3px solid ${tier.frame}`,
+            }}
+          >
             {card.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={card.avatarUrl}
                 alt={`${card.name} logo`}
-                className="size-20 shrink-0 rounded-full bg-white object-contain p-1"
-                style={{ border: "3px solid #4a3421", transform: "rotate(-2deg)" }}
+                className="max-h-[80%] max-w-[80%] object-contain"
               />
             ) : (
-              <div
-                className="grid size-20 shrink-0 place-items-center rounded-full text-4xl"
-                style={{ border: "3px solid #4a3421", background: "#f6e2c4", transform: "rotate(-2deg)" }}
-              >
+              <div className="text-8xl" style={{ color: tier.ink }}>
                 {card.name.slice(0, 1).toUpperCase()}
               </div>
             )}
-            <div className="min-w-0">
-              <h1 className="truncate text-4xl leading-tight">{card.name}</h1>
-              <p className="text-lg opacity-70">by {card.owner}</p>
-            </div>
-            <div className="ml-auto text-center">
-              <div
-                className="grid size-16 place-items-center rounded-full text-3xl"
-                style={{ border: "3px solid #4a3421", background: "#eec170", transform: "rotate(3deg)" }}
+            {/* language chip */}
+            {card.language && (
+              <span
+                className="absolute bottom-2 right-2 rounded-full bg-white/90 px-3 py-0.5 text-sm"
+                style={{ border: "2px solid #4a3421" }}
               >
-                {card.overall}
-              </div>
-              <p className="mt-1 text-sm opacity-70">overall</p>
-            </div>
+                {card.language}
+              </span>
+            )}
           </div>
 
-          {/* vibe */}
-          <p className="mt-4 text-xl" style={{ color: "#c96f4a" }}>
-            ✦ {card.vibe}
-          </p>
+          {/* name + owner */}
+          <div className="mt-3 px-1 text-center">
+            <h1 className="truncate text-4xl leading-tight">{card.name}</h1>
+            <p className="text-lg opacity-70">by {card.owner}</p>
+            <p className="mt-1 text-xl" style={{ color: tier.ink }}>
+              ✦ {card.vibe}
+            </p>
+          </div>
 
           {/* description */}
-          <p className="mt-2 text-lg leading-6 opacity-85">{card.description}</p>
+          <p className="mt-2 px-1 text-center text-base leading-5 opacity-80">{card.description}</p>
 
-          {/* divider */}
-          <div className="my-5 border-t-2 border-dashed" style={{ borderColor: "#d8c6ac" }} />
+          <div className="my-3 border-t-2 border-dashed" style={{ borderColor: "#e2d3ba" }} />
 
           {/* stats */}
-          <div className="space-y-3">
+          <div className="space-y-2 px-1">
             {card.stats.map((stat, i) => (
-              <div key={stat.label} className="flex items-center gap-3">
-                <span className="w-16 text-lg">{stat.label}</span>
+              <div key={stat.label} className="flex items-center gap-2">
+                <span className="w-14 text-base">{stat.label}</span>
                 <div
-                  className="h-4 flex-1 overflow-hidden rounded-full"
+                  className="h-3 flex-1 overflow-hidden rounded-full"
                   style={{ border: "2px solid #4a3421", background: "#faf3e8" }}
                 >
                   <div
@@ -142,37 +172,31 @@ export default async function GithubCardPage({
                     style={{ width: `${stat.value}%`, background: crayons[i % crayons.length] }}
                   />
                 </div>
-                <span className="w-8 text-right text-lg">{stat.value}</span>
+                <span className="w-7 text-right text-base">{stat.value}</span>
               </div>
             ))}
           </div>
 
-          {/* little facts */}
-          <div className="mt-5 flex flex-wrap gap-2 text-base">
-            <span className="rounded-full px-3 py-1" style={{ border: "2px solid #4a3421", transform: "rotate(-1deg)" }}>
-              ★ {card.stars.toLocaleString()} stars
+          {/* footer facts */}
+          <div className="mt-3 flex flex-wrap justify-center gap-1.5 px-1 text-sm">
+            <span className="rounded-full px-2.5 py-0.5" style={{ border: "2px solid #4a3421" }}>
+              ★ {card.stars.toLocaleString()}
             </span>
-            <span className="rounded-full px-3 py-1" style={{ border: "2px solid #4a3421", transform: "rotate(1deg)" }}>
+            <span className="rounded-full px-2.5 py-0.5" style={{ border: "2px solid #4a3421" }}>
               ♥ {card.contributors.toLocaleString()} humans
             </span>
-            {card.language && (
-              <span className="rounded-full px-3 py-1" style={{ border: "2px solid #4a3421" }}>
-                speaks {card.language}
-              </span>
-            )}
-            <span className="rounded-full px-3 py-1" style={{ border: "2px solid #4a3421", transform: "rotate(-1deg)" }}>
-              last seen {timeAgo(card.pushedAt)}
+            <span className="rounded-full px-2.5 py-0.5" style={{ border: "2px solid #4a3421" }}>
+              seen {timeAgo(card.pushedAt)}
             </span>
           </div>
         </div>
 
         {/* actions */}
-        <div className="mt-7 flex flex-col gap-3">
+        <div className="mt-6 flex flex-col gap-3">
           <ShareCardButton
             title={`${card.name} — a Curipo agent card`}
             text={card.description}
             className="w-full py-3 text-xl transition hover:-translate-y-0.5"
-            // hand-drawn button
           />
           <a
             href={card.githubUrl}
