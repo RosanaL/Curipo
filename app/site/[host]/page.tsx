@@ -86,16 +86,8 @@ export default async function SiteCardPage({
             <span className="text-base opacity-60">{card.host}</span>
           </div>
 
-          {/* portrait — animation (like main), else image, else initial */}
-          <div
-            className="relative flex items-center justify-center overflow-hidden"
-            style={{
-              height: 220,
-              borderRadius: "16px",
-              background: `radial-gradient(circle at 50% 35%, #ffffff, ${p.tint})`,
-              border: `3px solid ${p.frame}`,
-            }}
-          >
+          {/* portrait — no frame, blends straight into the card */}
+          <div className="relative flex h-[220px] items-center justify-center">
             {card.animationUrl ? (
               <video
                 aria-label={`${card.name} animation`}
@@ -104,7 +96,7 @@ export default async function SiteCardPage({
                 muted
                 playsInline
                 preload="metadata"
-                className="max-h-[92%] max-w-[92%] object-contain"
+                className="max-h-full max-w-full object-contain"
               >
                 <source
                   src={card.animationUrl}
