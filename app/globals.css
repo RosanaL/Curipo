@@ -2,8 +2,8 @@
 
 :root {
   color-scheme: light;
-  --background: #f6f7f9;
-  --foreground: #0f172a;
+  --background: #e8e2cc;
+  --foreground: #312d22;
 }
 
 @theme inline {
@@ -14,20 +14,225 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, sans-serif;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  font-variant-ligatures: normal;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+}
+
+.crt-shell {
+  --crt-shell-hi: #fbf4df;
+  --crt-shell: #e8e2cc;
+  --crt-shell-deep: #c9bea3;
+  --crt-screen: #f4efd9;
+  --crt-screen-soft: rgba(246, 240, 218, 0.9);
+  --crt-text: #312d22;
+  --crt-muted: #756f61;
+  --crt-line: rgba(120, 110, 84, 0.42);
+  --crt-green: #c9f16c;
+  --crt-pink: #d68df0;
+  background:
+    radial-gradient(circle at 16% 14%, rgba(255, 255, 255, 0.72) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 18%, rgba(82, 91, 132, 0.22) 0 1px, transparent 2px),
+    radial-gradient(circle at 42% 74%, rgba(126, 89, 156, 0.18) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 64%, rgba(255, 255, 255, 0.64) 0 1px, transparent 2px),
+    linear-gradient(180deg, #f7efd8 0%, #e9e4cf 46%, #d8d7c7 100%) !important;
+  background-size: 180px 180px, 220px 220px, 260px 260px, 200px 200px, 100% 100%;
+  color: var(--crt-text) !important;
+}
+
+.crt-shell::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.18) 50%, rgba(94, 84, 63, 0.04) 50%),
+    radial-gradient(ellipse at center, transparent 58%, rgba(90, 78, 55, 0.12) 100%);
+  background-size: 100% 5px, 100% 100%;
+  mix-blend-mode: soft-light;
+}
+
+.crt-shell > * {
+  position: relative;
+  z-index: 2;
+}
+
+.crt-shell :is(header, form, article, aside, [data-testid="selected-agent-frame"]) {
+  border-color: var(--crt-line) !important;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.48), transparent 64%),
+    linear-gradient(180deg, rgba(250, 245, 225, 0.96), rgba(226, 218, 190, 0.92)) !important;
+  color: var(--crt-text) !important;
+  box-shadow:
+    inset 0 0 22px rgba(255, 255, 255, 0.42),
+    inset 0 -18px 28px rgba(122, 105, 72, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.52),
+    0 16px 30px rgba(91, 77, 52, 0.16) !important;
+}
+
+.crt-shell :is([class*="bg-white"], [class*="bg-slate"], [class*="bg-[#fbfaf6]"], [class*="bg-[#0b302f]"], [class*="bg-black"]) {
+  background:
+    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.42), transparent 62%),
+    linear-gradient(180deg, rgba(249, 244, 224, 0.94), rgba(226, 218, 190, 0.9)) !important;
+}
+
+.crt-shell :is([class*="border-slate"], [class*="border-[#173b3a]"], [class*="border-[#c8c1b5]"], [class*="border-[#d8d1c5]"]) {
+  border-color: var(--crt-line) !important;
+}
+
+.crt-shell :is(h1, h2, h3, p, span, label, a, button, input, textarea, select) {
+  color: var(--crt-text) !important;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 500;
+  letter-spacing: 0 !important;
+}
+
+.crt-shell :is(input, textarea, select) {
+  background: rgba(255, 252, 239, 0.78) !important;
+  border-color: var(--crt-line) !important;
+}
+
+.crt-shell :is(input::placeholder, textarea::placeholder) {
+  color: rgba(49, 45, 34, 0.48) !important;
+}
+
+.crt-shell button,
+.crt-shell a {
+  text-shadow:
+    1px 0 rgba(255, 255, 255, 0.72),
+    -1px 0 rgba(143, 127, 93, 0.22);
+}
+
+.crt-shell button,
+.crt-shell [role="button"],
+.crt-shell a[href="/crew"],
+.crt-shell a[href="/"] {
+  border-color: var(--crt-line) !important;
+}
+
+.crt-shell button[type="submit"],
+.crt-shell .crt-cta {
+  background: var(--crt-green) !important;
+  border-color: #7db238 !important;
+  color: #20380a !important;
+  box-shadow: 0 0 18px rgba(201, 241, 108, 0.34), 4px 4px 0 rgba(120, 110, 84, 0.34) !important;
+}
+
+.crt-shell video,
+.crt-shell img {
+  filter: contrast(1.08) saturate(0.92);
+}
+
+.crt-shell .crt-screen-card {
+  border-radius: 30px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.28) 50%, rgba(120, 110, 84, 0.04) 50%),
+    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.58), transparent 62%),
+    #f4efd9 !important;
+  background-size: 100% 4px, 100% 100%, 100% 100%;
+}
+
+.crt-shell .crt-soft-panel {
+  border: 2px solid var(--crt-line);
+  background: rgba(246, 240, 218, 0.86);
+  box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.38), 0 0 24px rgba(126, 89, 156, 0.14);
+}
+
+.crt-shell h1,
+.crt-shell h2,
+.crt-shell h3,
+.crt-shell .font-black {
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 700 !important;
+  line-height: 1.05;
+  text-shadow:
+    1px 0 rgba(255, 255, 255, 0.78),
+    -1px 0 rgba(117, 111, 97, 0.3),
+    0 0 10px rgba(255, 255, 255, 0.34) !important;
+}
+
+.crt-shell article.agent-color-card {
+  background: var(--agent-card-bg) !important;
+  border-color: var(--agent-card-border) !important;
+  color: var(--agent-card-ink) !important;
+  box-shadow:
+    0 18px 34px rgba(37, 13, 48, 0.24),
+    0 0 0 1px rgba(255, 255, 255, 0.38) !important;
+}
+
+.crt-shell article.agent-color-card :is(h1, h2, h3, p, span, label, a, button, select) {
+  color: var(--agent-card-ink) !important;
+  text-shadow: none !important;
+}
+
+.crt-shell article.agent-color-card .agent-muted {
+  color: var(--agent-card-muted) !important;
+}
+
+.crt-shell article.agent-color-card a.agent-art-pad {
+  background: var(--agent-avatar-bg) !important;
+  background-color: var(--agent-avatar-bg) !important;
+}
+
+.crt-shell article.agent-color-card .agent-avatar-shadow {
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--agent-card-ink) 28%, transparent), transparent 68%) !important;
+}
+
+.crt-shell article.agent-color-card .agent-link-pill,
+.crt-shell article.agent-color-card .agent-card-control,
+.crt-shell article.agent-color-card button {
+  background: var(--agent-card-control) !important;
+  border-color: var(--agent-card-border) !important;
+  color: var(--agent-card-ink) !important;
+  box-shadow: none !important;
+}
+
+.crt-shell article.agent-color-card video,
+.crt-shell article.agent-color-card img {
+  filter: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+.font-black {
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-shadow:
+    1px 0 rgba(255, 255, 255, 0.66),
+    -1px 0 rgba(117, 111, 97, 0.22);
+}
+
+textarea::placeholder,
+input::placeholder {
+  letter-spacing: 0;
 }
 
 ::selection {
-  background: rgba(99, 102, 241, 0.18);
+  background: rgba(201, 241, 108, 0.46);
 }
 
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f6f7f9;
+  background: #e8e2cc;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #b8aa89;
   border-radius: 4px;
 }

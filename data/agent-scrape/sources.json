@@ -1,0 +1,27 @@
+[
+  {
+    "id": "futurepedia-ai-agents",
+    "name": "Futurepedia AI Agents",
+    "url": "https://www.futurepedia.io/ai-tools/ai-agents",
+    "includeSameDomain": true,
+    "includeExternal": true,
+    "sameDomainPathPrefixes": ["/tool/"],
+    "notes": "Broad AI agents category. Expect some platforms/tools mixed in."
+  },
+  {
+    "id": "aitoptools",
+    "name": "AITopTools",
+    "url": "https://aitoptools.com/",
+    "includeSameDomain": true,
+    "includeExternal": false,
+    "notes": "Large AI tools directory. Use as discovery, not as final truth."
+  },
+  {
+    "id": "agent-ai",
+    "name": "Agent.ai",
+    "url": "https://agent.ai/",
+    "includeSameDomain": true,
+    "includeExternal": false,
+    "notes": "Professional AI agent marketplace/network."
+  }
+]

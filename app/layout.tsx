@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Curipo — Find the right AI agent",
   description: "Describe what you want to automate and get matched with the best AI agents.",
 };
@@ -12,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col bg-[#f6f7f9] text-slate-900">
         {children}
       </body>
